@@ -155,8 +155,22 @@ document.getElementById('downloadPDF').addEventListener('click', () => {
     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
   });
 
-  pdf.save('My_Whiteboard.pdf');
+  // Mobile-friendly download
+  if (/Mobi|Android/i.test(navigator.userAgent)) {
+    const pdfBlob = pdf.output('blob');
+    const url = URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'My_Whiteboard.pdf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } else {
+    pdf.save('My_Whiteboard.pdf'); // Desktop
+  }
 });
+
 
 // 🖌️ Mouse events
 canvas.addEventListener('mousedown', (e) => {
