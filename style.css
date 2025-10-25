@@ -1,0 +1,112 @@
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f2f4f8;
+    overflow: hidden;
+  }
+  
+  .main-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  /* 🧩 Sidebar for slides */
+  .sidebar {
+    width: 130px;
+    background: linear-gradient(90deg, #11998e, #38ef7d);
+    border-right: 5px solid black;
+    overflow-y: auto;
+    padding: 10px;
+  }
+  
+  .slide-thumb {
+    width: 100%;
+    aspect-ratio: 4/3;
+    border: 2px solid transparent;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  
+  .slide-thumb.active {
+    border-color: #0078ff;
+    box-shadow: 0 0 5px rgba(0, 120, 255, 0.5);
+  }
+  
+  .slide-thumb:hover {
+    transform: scale(1.02);
+  }
+  
+  /* 🖌️ Top toolbar */
+  .toolbar {
+    background: linear-gradient(90deg, #8e2de2, #ff6a00);
+    color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .toolbar button {
+    background: white;
+    border: none;
+    color: #0078ff;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .toolbar button:hover {
+    background: #e0f0ff;
+  }
+  
+  .toolbar input[type="color"],
+  .toolbar input[type="range"] {
+    cursor: pointer;
+  }
+  
+  /* 🎨 Canvas area */
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  canvas {
+    flex: 1;
+    background: white;
+    cursor: none; /* hide default cursor */
+  }
+  
+  /* Custom drawing cursor */
+  .cursor-dot {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: black;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .toolbar .power {
+    margin-left: auto; /* pushes it to extreme right */
+    background: linear-gradient(45deg, #FFD700, #FFC107);
+    color: black;
+    font-weight: 700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.4);
+    padding: 6px 12px;
+    border-radius: 12px;
+    text-shadow: 0 0 5px rgba(255,255,255,0.5);
+}
+
+.toolbar .power:hover {
+    box-shadow: 0 0 20px rgba(255, 223, 0, 0.8), 0 0 30px rgba(255, 223, 0, 0.6);
+    transform: scale(1.05);
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Teaching Whiteboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- For PDF download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Sidebar for slides -->
+    <div class="sidebar" id="slidesPanel"></div>
+
+    <!-- Main content area -->
+    <div class="content">
+      <div class="toolbar">
+        <button id="newSlide">➕ New Slide</button>
+        <button id="clear">🧹 Clear</button>
+        <input type="color" id="colorPicker" value="#000000" />
+        <input type="range" id="penSize" min="1" max="20" value="3" />
+        <button id="erase">🩹 Eraser</button>
+        <button id="downloadPDF">📥 Download PDF</button>
+        <button class="power">Powered by Diamond Company</button>
+      </div>
+
+      <canvas id="board"></canvas>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
