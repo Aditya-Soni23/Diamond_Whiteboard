@@ -144,6 +144,7 @@ document.getElementById('newSlide').addEventListener('click', () => {
   updateSlideThumbnails();
 });
 
+
 // 📥 Download all slides as PDF
 document.getElementById('downloadPDF').addEventListener('click', () => {
   saveCurrentSlide();
@@ -155,22 +156,24 @@ document.getElementById('downloadPDF').addEventListener('click', () => {
     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
   });
 
-  // Mobile-friendly download
-  if (/Mobi|Android/i.test(navigator.userAgent)) {
-    const pdfBlob = pdf.output('blob');
-    const url = URL.createObjectURL(pdfBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'My_Whiteboard.pdf';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  } else {
-    pdf.save('My_Whiteboard.pdf'); // Desktop
-  }
+  pdf.save('My_Whiteboard.pdf'); // now works on mobile too
 });
 
+
+
+// 📥 Download all slides as PDF
+//document.getElementById('downloadPDF').addEventListener('click', () => {
+ // saveCurrentSlide();
+ // const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
+
+ // slides.forEach((slide, i) => {
+ //   const imgData = slide.toDataURL('image/png');
+ //   if (i > 0) pdf.addPage();
+ //   pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+//  });
+
+ // pdf.save('My_Whiteboard.pdf');
+//});
 
 // 🖌️ Mouse events
 canvas.addEventListener('mousedown', (e) => {
