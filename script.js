@@ -19,12 +19,22 @@ const cursorDot = document.createElement('div');
 cursorDot.classList.add('cursor-dot');
 document.body.appendChild(cursorDot);
 
-document.addEventListener('mousemove', (e) => {
-  cursorDot.style.left = e.clientX + 'px';
-  cursorDot.style.top = e.clientY + 'px';
+function updateCursor(x, y) {
+  cursorDot.style.left = x + 'px';
+  cursorDot.style.top = y + 'px';
   cursorDot.style.background = erasing ? 'red' : currentColor;
   cursorDot.style.width = erasing ? '25px' : penSize + 'px';
   cursorDot.style.height = erasing ? '25px' : penSize + 'px';
+}
+
+// Update cursor on mousemove
+document.addEventListener('mousemove', (e) => updateCursor(e.clientX, e.clientY));
+// Update cursor on touchmove
+document.addEventListener('touchmove', (e) => {
+  if (e.touches.length > 0) {
+    const touch = e.touches[0];
+    updateCursor(touch.clientX, touch.clientY);
+  }
 });
 
 function createNewSlide() {
@@ -37,7 +47,7 @@ function createNewSlide() {
 function saveCurrentSlide() {
   const slideCanvas = slides[currentSlide];
   const slideCtx = slideCanvas.getContext('2d');
-  slideCtx.clearRect(0, 0, slideCanvas.width, slideCanvas.height); // ensure clean save
+  slideCtx.clearRect(0, 0, slideCanvas.width, slideCanvas.height);
   slideCtx.drawImage(canvas, 0, 0);
   updateSlideThumbnails();
 }
@@ -47,9 +57,9 @@ function loadSlide(index) {
   ctx.drawImage(slides[index], 0, 0);
 }
 
-function startPosition(e) {
+function startPosition(x, y) {
   drawing = true;
-  draw(e);
+  draw({ x, y });
 }
 
 function endPosition() {
@@ -61,9 +71,8 @@ function endPosition() {
 function draw(e) {
   if (!drawing) return;
 
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const x = e.x;
+  const y = e.y;
 
   ctx.lineWidth = erasing ? 25 : penSize;
   ctx.lineCap = 'round';
@@ -73,6 +82,11 @@ function draw(e) {
   ctx.stroke();
   ctx.beginPath();
   ctx.moveTo(x, y);
+}
+
+function getCanvasCoords(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: clientX - rect.left, y: clientY - rect.top };
 }
 
 function updateSlideThumbnails() {
@@ -114,16 +128,11 @@ document.getElementById('erase').addEventListener('click', () => {
   document.getElementById('erase').innerText = erasing ? '✏️ Pen' : '🩹 Eraser';
 });
 
-// ✅ Clear current slide properly
 document.getElementById('clear').addEventListener('click', () => {
-  // Clear main canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Clear stored slide in memory
   const slideCanvas = slides[currentSlide];
   const slideCtx = slideCanvas.getContext('2d');
   slideCtx.clearRect(0, 0, slideCanvas.width, slideCanvas.height);
-
   updateSlideThumbnails();
 });
 
@@ -149,10 +158,34 @@ document.getElementById('downloadPDF').addEventListener('click', () => {
   pdf.save('My_Whiteboard.pdf');
 });
 
-// Mouse drawing events
-canvas.addEventListener('mousedown', startPosition);
+// 🖌️ Mouse events
+canvas.addEventListener('mousedown', (e) => {
+  const pos = getCanvasCoords(e.clientX, e.clientY);
+  startPosition(pos.x, pos.y);
+});
+canvas.addEventListener('mousemove', (e) => {
+  const pos = getCanvasCoords(e.clientX, e.clientY);
+  draw(pos);
+});
 canvas.addEventListener('mouseup', endPosition);
-canvas.addEventListener('mousemove', draw);
+
+// 🖐️ Touch events
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const pos = getCanvasCoords(touch.clientX, touch.clientY);
+  startPosition(pos.x, pos.y);
+});
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const pos = getCanvasCoords(touch.clientX, touch.clientY);
+  draw(pos);
+});
+canvas.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  endPosition();
+});
 
 // Initialize first slide preview
 updateSlideThumbnails();
