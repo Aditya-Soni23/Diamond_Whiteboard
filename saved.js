@@ -41,6 +41,33 @@ window.addEventListener('DOMContentLoaded', () => {
       loadSlide(currentSlide);
       updateSlideThumbnails();
     });
+    // upload button hookup
+  const uploadBtn = document.getElementById('uploadBtn');
+  if (uploadBtn) {
+    uploadBtn.addEventListener('click', () => {
+      // create file input dynamically
+      let fileInput = document.getElementById('filePicker');
+      if (!fileInput) {
+        fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.id = 'filePicker';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+      }
+  
+      fileInput.click();
+  
+      fileInput.onchange = async () => {
+        const file = fileInput.files[0];
+        if (file) {
+          await insertPastedBlob(file); // same function as paste
+        }
+        fileInput.value = ''; // reset for next upload
+      };
+    });
+  }
+  
   
     // state
     let drawing = false;
@@ -242,12 +269,10 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   
     // ---------- paste handling ----------
-    async function pasteFromClipboardButton() {
-      // modern clipboard api read (requires permission & secure context)
-      if (!navigator.clipboard || !navigator.clipboard.read) {
-        alert('Paste button not supported in this browser — use Ctrl+V or paste from system clipboard.');
-        return;
-      }
+   // modern clipboard + mobile file picker
+  async function pasteFromClipboardButton() {
+    // desktop: Async Clipboard API supported?
+    if (navigator.clipboard && navigator.clipboard.read) {
       try {
         const items = await navigator.clipboard.read();
         for (const item of items) {
@@ -262,50 +287,80 @@ window.addEventListener('DOMContentLoaded', () => {
         alert('No image found in clipboard.');
       } catch (err) {
         console.error('paste read error', err);
-        alert('Permission denied or not supported — use Ctrl+V instead.');
+        alert('Permission denied or not supported — try selecting image from device.');
+        openFilePicker();
       }
+    } else {
+      // fallback: mobile or unsupported browser → file picker
+      openFilePicker();
+    }
+  }
+  
+  // file picker fallback
+  function openFilePicker() {
+    let fileInput = document.getElementById('filePicker');
+    if (!fileInput) {
+      fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.id = 'filePicker';
+      fileInput.style.display = 'none';
+      document.body.appendChild(fileInput);
     }
   
-    async function insertPastedBlob(blob) {
-      const url = URL.createObjectURL(blob);
-      const img = new Image();
-      img.onload = () => {
-        // place image centered-ish
-        const maxW = Math.min(400, img.width);
-        const aspect = img.width / img.height;
-        const w = maxW;
-        const h = Math.round(w / aspect);
-        pastedImage = {
-          img,
-          x: 80,
-          y: 80,
-          w,
-          h
-        };
-        resizeMode = true; // open in resize mode automatically
-        drawAll();
-        URL.revokeObjectURL(url);
-        // ensure button shows Finish state if exists
-        if (resizeBtn) resizeBtn.textContent = '✅ Finish Resizing';
-      };
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        alert('Could not load pasted image.');
-      };
-      img.src = url;
-    }
+    fileInput.click();
   
-    // legacy paste (Ctrl+V)
-    window.addEventListener('paste', ev => {
-      const items = ev.clipboardData?.items || [];
-      for (const it of items) {
-        if (it.type && it.type.indexOf('image') !== -1) {
-          const f = it.getAsFile();
-          if (f) insertPastedBlob(f);
-          return;
-        }
+    fileInput.onchange = async () => {
+      const file = fileInput.files[0];
+      if (file) {
+        await insertPastedBlob(file);
       }
-    });
+      fileInput.value = ''; // reset for next time
+    };
+  }
+  
+  // same as your original function
+  async function insertPastedBlob(blob) {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      // place image centered-ish
+      const maxW = Math.min(400, img.width);
+      const aspect = img.width / img.height;
+      const w = maxW;
+      const h = Math.round(w / aspect);
+      pastedImage = {
+        img,
+        x: 80,
+        y: 80,
+        w,
+        h
+      };
+      resizeMode = true; // open in resize mode automatically
+      drawAll();
+      URL.revokeObjectURL(url);
+      // ensure button shows Finish state if exists
+      if (resizeBtn) resizeBtn.textContent = '✅ Finish Resizing';
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      alert('Could not load pasted image.');
+    };
+    img.src = url;
+  }
+  
+  // legacy paste (Ctrl+V)
+  window.addEventListener('paste', ev => {
+    const items = ev.clipboardData?.items || [];
+    for (const it of items) {
+      if (it.type && it.type.indexOf('image') !== -1) {
+        const f = it.getAsFile();
+        if (f) insertPastedBlob(f);
+        return;
+      }
+    }
+  });
+  
   
     // ---------- overlay interaction (mouse/touch) ----------
     function overlayHitTest(x, y) {

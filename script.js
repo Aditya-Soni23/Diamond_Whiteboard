@@ -41,6 +41,33 @@ window.addEventListener('DOMContentLoaded', () => {
     loadSlide(currentSlide);
     updateSlideThumbnails();
   });
+  // upload button hookup
+const uploadBtn = document.getElementById('uploadBtn');
+if (uploadBtn) {
+  uploadBtn.addEventListener('click', () => {
+    // create file input dynamically
+    let fileInput = document.getElementById('filePicker');
+    if (!fileInput) {
+      fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.id = 'filePicker';
+      fileInput.style.display = 'none';
+      document.body.appendChild(fileInput);
+    }
+
+    fileInput.click();
+
+    fileInput.onchange = async () => {
+      const file = fileInput.files[0];
+      if (file) {
+        await insertPastedBlob(file); // same function as paste
+      }
+      fileInput.value = ''; // reset for next upload
+    };
+  });
+}
+
 
   // state
   let drawing = false;
